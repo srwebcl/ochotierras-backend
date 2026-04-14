@@ -1,9 +1,58 @@
-<?php
-
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use App\Models\Product;
+use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::match(['get', 'post'], '/fix-images', function (Request $request) {
+    if ($request->isMethod('post')) {
+        foreach ($request->input('images', []) as $productId => $imagePath) {
+            Product::where('id', $productId)->update(['image' => $imagePath ?: null]);
+        }
+        return redirect('/fix-images')->with('success', '¡Imágenes vinculadas exitosamente en la base de datos!');
+    }
+
+    $products = Product::all();
+    
+    // Get all files from the public storage products directory
+    $files = [];
+    if (Storage::disk('public')->exists('products')) {
+        $allFiles = Storage::disk('public')->files('products');
+        foreach ($allFiles as $file) {
+            $files[] = $file; // e.g. "products/reserva-especial-cs.webp"
+        }
+    }
+
+    $html = '<html><head><title>Sincronizador</title><style>body{font-family:sans-serif;padding:40px;background:#1a1a1a;color:#fff;} .card{background:#2a2a2a;padding:20px;border-radius:10px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;} select{padding:10px;background:#333;color:white;border:1px solid #555;border-radius:5px;} button{padding:15px 30px;background:#e53e3e;color:white;border:none;border-radius:8px;cursor:pointer;font-size:18px;width:100%;}</style></head><body>';
+    $html .= '<h1>🍷 Vinculador Directo de Imágenes</h1>';
+    $html .= '<p>Selecciona la foto física exacta de tu cPanel para cada vino.</p>';
+    
+    if (session('success')) {
+        $html .= '<div style="background:#38a169;padding:15px;border-radius:5px;margin-bottom:20px;">✓ '.session('success').'</div>';
+    }
+
+    $html .= '<form method="POST" action="/fix-images">';
+    $html .= csrf_field();
+
+    foreach ($products as $p) {
+        $html .= '<div class="card">';
+        $html .= '<div><strong>' . $p->name . '</strong><br><small style="color:#aaa;">' . $p->subtitle . '</small></div>';
+        $html .= '<select name="images['.$p->id.']">';
+        $html .= '<option value="">-- Sin Imagen --</option>';
+        foreach ($files as $f) {
+            $selected = ($p->image === $f) ? 'selected' : '';
+            $html .= '<option value="'.$f.'" '.$selected.'>'.basename($f).'</option>';
+        }
+        $html .= '</select></div>';
+    }
+
+    $html .= '<button type="submit">Guardar y Sincronizar Todo</button>';
+    $html .= '</form></body></html>';
+
+    return $html;
 });
 
 // TEMPORARY DEPLOYMENT ROUTE - DELETE AFTER USE
