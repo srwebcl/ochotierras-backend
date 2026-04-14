@@ -25,5 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $e) {
+            throw new \RuntimeException("VALIDATION ERROR: " . json_encode($e->errors()));
+        });
     })->create();
