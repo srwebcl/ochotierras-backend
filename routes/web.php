@@ -19,14 +19,24 @@ Route::match(['get', 'post'], '/fix-images', function (Request $request) {
 
     $products = Product::all();
     
-    // Get all files from the public storage products directory
     $files = [];
     if (Storage::disk('public')->exists('products')) {
-        $allFiles = Storage::disk('public')->files('products');
-        foreach ($allFiles as $file) {
-            $files[] = $file; // e.g. "products/reserva-especial-cs.webp"
+        $files = array_merge($files, Storage::disk('public')->files('products'));
+    }
+    // Also grab everything directly in 'public' just in case they dropped them there natively
+    $files = array_merge($files, Storage::disk('public')->files('/'));
+    
+    // Also check the raw public/products folder
+    if (is_dir(public_path('products'))) {
+        $rawFiles = scandir(public_path('products'));
+        foreach($rawFiles as $rf) {
+            if ($rf != '.' && $rf != '..') {
+                $files[] = 'products/' . $rf;
+            }
         }
     }
+    // Remove duplicates
+    $files = array_unique($files);
 
     $html = '<html><head><title>Sincronizador</title><style>body{font-family:sans-serif;padding:40px;background:#1a1a1a;color:#fff;} .card{background:#2a2a2a;padding:20px;border-radius:10px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;} select{padding:10px;background:#333;color:white;border:1px solid #555;border-radius:5px;} button{padding:15px 30px;background:#e53e3e;color:white;border:none;border-radius:8px;cursor:pointer;font-size:18px;width:100%;}</style></head><body>';
     $html .= '<h1>🍷 Vinculador Directo de Imágenes</h1>';
