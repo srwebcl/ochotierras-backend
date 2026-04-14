@@ -5,9 +5,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table) {
@@ -18,40 +15,80 @@ return new class extends Migration {
                 $table->text('description_en')->nullable()->after('description');
             }
             if (!Schema::hasColumn('products', 'short_description_en')) {
-                $table->text('short_description_en')->nullable()->after('short_description');
+                if (Schema::hasColumn('products', 'short_description')) {
+                    $table->text('short_description_en')->nullable()->after('short_description');
+                } else {
+                    $table->text('short_description_en')->nullable();
+                }
             }
             if (!Schema::hasColumn('products', 'tasting_notes_en')) {
-                $table->text('tasting_notes_en')->nullable()->after('tasting_notes');
+                if (Schema::hasColumn('products', 'tasting_notes')) {
+                    $table->text('tasting_notes_en')->nullable()->after('tasting_notes');
+                } else {
+                    $table->text('tasting_notes_en')->nullable();
+                }
             }
             if (!Schema::hasColumn('products', 'pairing_en')) {
-                $table->text('pairing_en')->nullable()->after('pairing');
+                if (Schema::hasColumn('products', 'pairing')) {
+                    $table->text('pairing_en')->nullable()->after('pairing');
+                } else {
+                    $table->text('pairing_en')->nullable();
+                }
             }
             if (!Schema::hasColumn('products', 'service_temp_en')) {
-                $table->string('service_temp_en')->nullable()->after('service_temp');
+                if (Schema::hasColumn('products', 'service_temp')) {
+                    $table->string('service_temp_en')->nullable()->after('service_temp');
+                } else {
+                    $table->string('service_temp_en')->nullable();
+                }
             }
         });
 
         Schema::table('categories', function (Blueprint $table) {
             if (!Schema::hasColumn('categories', 'name_en')) {
-                $table->string('name_en')->nullable()->after('name');
+                if (Schema::hasColumn('categories', 'name')) {
+                    $table->string('name_en')->nullable()->after('name');
+                } else {
+                    $table->string('name_en')->nullable();
+                }
             }
             if (!Schema::hasColumn('categories', 'description_en')) {
-                $table->text('description_en')->nullable()->after('description');
+                if (Schema::hasColumn('categories', 'description')) {
+                    $table->text('description_en')->nullable()->after('description');
+                } else {
+                    $table->text('description_en')->nullable();
+                }
             }
         });
 
         Schema::table('hero_sections', function (Blueprint $table) {
             if (!Schema::hasColumn('hero_sections', 'title_en')) {
-                $table->string('title_en')->nullable()->after('title');
+                if (Schema::hasColumn('hero_sections', 'title')) {
+                    $table->string('title_en')->nullable()->after('title');
+                } else {
+                    $table->string('title_en')->nullable();
+                }
             }
             if (!Schema::hasColumn('hero_sections', 'subtitle_en')) {
-                $table->string('subtitle_en')->nullable()->after('subtitle');
+                if (Schema::hasColumn('hero_sections', 'subtitle')) {
+                    $table->string('subtitle_en')->nullable()->after('subtitle');
+                } else {
+                    $table->string('subtitle_en')->nullable();
+                }
             }
             if (!Schema::hasColumn('hero_sections', 'button_primary_text_en')) {
-                $table->string('button_primary_text_en')->nullable()->after('button_primary_text');
+                if (Schema::hasColumn('hero_sections', 'button_primary_text')) {
+                    $table->string('button_primary_text_en')->nullable()->after('button_primary_text');
+                } else {
+                    $table->string('button_primary_text_en')->nullable();
+                }
             }
             if (!Schema::hasColumn('hero_sections', 'button_secondary_text_en')) {
-                $table->string('button_secondary_text_en')->nullable()->after('button_secondary_text');
+                if (Schema::hasColumn('hero_sections', 'button_secondary_text')) {
+                    $table->string('button_secondary_text_en')->nullable()->after('button_secondary_text');
+                } else {
+                    $table->string('button_secondary_text_en')->nullable();
+                }
             }
         });
     }
