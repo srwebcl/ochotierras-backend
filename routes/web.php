@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\StoreBanner;
 use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
@@ -14,6 +15,11 @@ Route::match(['get', 'post'], '/fix-images', function (Request $request) {
         foreach ($request->input('images', []) as $productId => $imagePath) {
             Product::where('id', $productId)->update(['image' => $imagePath ?: null]);
         }
+        
+        foreach ($request->input('banner_images', []) as $bannerId => $imagePath) {
+            StoreBanner::where('id', $bannerId)->update(['image' => $imagePath ?: null]);
+        }
+
         return redirect('/fix-images')->with('success', '¡Imágenes vinculadas exitosamente en la base de datos!');
     }
 
@@ -61,7 +67,24 @@ Route::match(['get', 'post'], '/fix-images', function (Request $request) {
         $html .= '</select></div>';
     }
 
-    $html .= '<button type="submit">Guardar y Sincronizar Todo</button>';
+    $banners = StoreBanner::all();
+    if ($banners->count() > 0) {
+        $html .= '<h2 style="margin-top:40px;">🖼️ Banners de Tienda</h2>';
+        foreach ($banners as $b) {
+            $html .= '<div class="card" style="border-left: 5px solid #e53e3e;">';
+            $html .= '<div><strong>' . $b->title . '</strong><br><small style="color:#aaa;">' . $b->subtitle . '</small></div>';
+            $html .= '<select name="banner_images['.$b->id.']">';
+            $html .= '<option value="">-- Sin Imagen --</option>';
+            foreach ($files as $f) {
+                // If the user uploads to the same 'products' folder or we can just list the same $files
+                $selected = ($b->image === $f) ? 'selected' : '';
+                $html .= '<option value="'.$f.'" '.$selected.'>'.basename($f).'</option>';
+            }
+            $html .= '</select></div>';
+        }
+    }
+
+    $html .= '<button type="submit" style="margin-top: 30px;">Guardar y Sincronizar Todo</button>';
     $html .= '</form></body></html>';
 
     return $html;
