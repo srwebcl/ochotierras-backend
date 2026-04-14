@@ -25,12 +25,5 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Illuminate\Validation\ValidationException $e) {
-            $files = request()->file('files');
-            $exactError = '';
-            if (is_array($files) && count($files) > 0 && $files[0] instanceof \Illuminate\Http\UploadedFile) {
-                $exactError = $files[0]->getErrorMessage();
-            }
-            throw new \RuntimeException("NATIVE PHP UPLOAD ERROR: " . $exactError . " | JSON: " . json_encode($e->errors()));
-        });
+        //
     })->create();
