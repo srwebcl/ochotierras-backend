@@ -16,6 +16,9 @@ class Order extends Model
         'status',
         'courier_name',
         'tracking_number',
+        'site_transaction_id',
+        'payment_id',
+        'marketing_opt_in',
     ];
 
     public function items()
