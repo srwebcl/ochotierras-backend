@@ -95,7 +95,6 @@ class ProductResource extends Resource
                                 Forms\Components\FileUpload::make('image')
                                     ->label('Imagen Principal')
                                     ->image()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                                     ->directory('products')
                                     ->columnSpanFull(),
 
@@ -104,7 +103,6 @@ class ProductResource extends Resource
                                     ->image()
                                     ->multiple()
                                     ->reorderable()
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                                     ->directory('products/gallery')
                                     ->columnSpanFull(),
 
