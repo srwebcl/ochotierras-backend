@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderConfirmed;
+use App\Mail\OrderNotification;
 
 class PaymentController extends Controller
 {
@@ -273,11 +276,25 @@ class PaymentController extends Controller
 
             // 2. Actualizar Orden
             $order->update([
-                'status' => 'PAID',
+                'status'     => 'PAID',
                 'payment_id' => $paymentId
             ]);
 
             DB::commit();
+
+            // 3. Enviar emails (con try/catch para no romper el flujo si el email falla)
+            try {
+                // Email de confirmación al cliente
+                if ($order->customer_email) {
+                    Mail::to($order->customer_email)->send(new OrderConfirmed($order));
+                }
+                // Notificación interna al equipo
+                Mail::to('info@ochotierras.cl')
+                    ->cc('contacto@ochotierras.cl')
+                    ->send(new OrderNotification($order));
+            } catch (\Exception $mailException) {
+                Log::error('Error enviando emails de confirmación de orden: ' . $mailException->getMessage());
+            }
 
             return redirect('https://ochotierras.vercel.app/checkout/success?order=' . $order->site_transaction_id);
 
