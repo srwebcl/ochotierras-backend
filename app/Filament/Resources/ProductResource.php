@@ -95,8 +95,11 @@ class ProductResource extends Resource
                                 Forms\Components\FileUpload::make('image')
                                     ->label('Imagen Principal')
                                     ->image()
+                                    ->disk('public')
+                                    ->visibility('public')
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                                     ->directory('products')
+                                    ->maxSize(10240) // 10MB
                                     ->columnSpanFull(),
 
                                 Forms\Components\FileUpload::make('gallery')
@@ -104,14 +107,20 @@ class ProductResource extends Resource
                                     ->image()
                                     ->multiple()
                                     ->reorderable()
+                                    ->disk('public')
+                                    ->visibility('public')
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                                     ->directory('products/gallery')
+                                    ->maxSize(10240) // 10MB
                                     ->columnSpanFull(),
 
                                 Forms\Components\FileUpload::make('technical_sheet')
                                     ->label('Ficha Técnica (PDF)')
+                                    ->disk('public')
+                                    ->visibility('public')
                                     ->acceptedFileTypes(['application/pdf'])
                                     ->directory('technical-sheets')
+                                    ->maxSize(20480) // 20MB
                                     ->downloadable()
                                     ->columnSpanFull(),
 
