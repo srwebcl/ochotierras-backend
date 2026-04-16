@@ -21,10 +21,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ($this->app->environment('production')) {
-            // Forzamos HTTPS y Dominio SIEMPRE en producción
-            URL::forceScheme('https');
-            URL::forceRootUrl('https://api.ochotierras.cl');
-
             // Aseguramos que el disco publico use la URL correcta
             config(['filesystems.disks.public.url' => 'https://api.ochotierras.cl/storage']);
         }
@@ -32,6 +28,5 @@ class AppServiceProvider extends ServiceProvider
         // Observers
         \App\Models\Product::observe(\App\Observers\ProductObserver::class);
         \App\Models\HeroSection::observe(\App\Observers\HeroSectionObserver::class);
-        \App\Models\Order::observe(\App\Observers\OrderObserver::class);
     }
 }
