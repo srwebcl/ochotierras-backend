@@ -81,9 +81,9 @@ class PaymentController extends Controller
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $product->id,
-                    'product_name' => $product->name,
                     'quantity' => $item['quantity'],
-                    'price' => $product->price,
+                    'unit_price' => $product->price,
+                    'total_price' => $product->price * $item['quantity'],
                 ]);
             }
 
