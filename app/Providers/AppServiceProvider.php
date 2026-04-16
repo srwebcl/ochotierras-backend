@@ -25,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
             config(['filesystems.disks.public.url' => 'https://api.ochotierras.cl/storage']);
         }
 
+        // Register Custom Resend Driver
+        \Illuminate\Support\Facades\Mail::extend('resend', function (array $config) {
+            return new \App\Mail\ResendTransport(config('services.resend.key'));
+        });
+
         // Observers
         \App\Models\Product::observe(\App\Observers\ProductObserver::class);
         \App\Models\HeroSection::observe(\App\Observers\HeroSectionObserver::class);
