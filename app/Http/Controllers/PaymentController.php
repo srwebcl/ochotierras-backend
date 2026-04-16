@@ -149,7 +149,12 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error en PaymentController@init: ' . $e->getMessage());
-            return response()->json(['error' => 'Error al procesar el pedido.'], 500);
+            return response()->json([
+                'error' => 'Error al procesar el pedido.',
+                'exception' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
         }
     }
 
