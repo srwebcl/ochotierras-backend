@@ -50,19 +50,13 @@ class StoreBannerResource extends Resource
                         Forms\Components\FileUpload::make('image')
                             ->label('Imagen Desktop')
                             ->image()
-                            ->disk('public')
-                            ->visibility('public')
                             ->directory('store-banners')
-                            ->maxSize(10240)
                             ->required()
                             ->columnSpan(1),
                         Forms\Components\FileUpload::make('mobile_image')
                             ->label('Imagen Móvil (Opcional)')
                             ->image()
-                            ->disk('public')
-                            ->visibility('public')
                             ->directory('store-banners/mobile')
-                            ->maxSize(10240)
                             ->columnSpan(1),
                     ])->columns(2),
 
