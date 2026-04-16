@@ -119,6 +119,7 @@ class PaymentController extends Controller
                 'expiration' => date('c', strtotime('+1 hour')),
                 'ipAddress' => $request->ip(),
                 'returnUrl' => $returnUrl,
+                'notificationUrl' => url('/api/payment/notify'),
                 'userAgent' => $request->userAgent() ?? 'Mozilla/5.0',
             ];
 
@@ -168,7 +169,8 @@ class PaymentController extends Controller
 
             if ($status === 'APPROVED') {
                 $paymentId = $data['payment'][0]['authorization'] ?? $requestId;
-                return $this->handleSuccess($order, $paymentId);
+                $this->finalizePayment($order, $paymentId);
+                return redirect('https://ochotierras.vercel.app/checkout/success?order=' . $order->site_transaction_id);
             } elseif ($status === 'PENDING') {
                 return redirect('https://ochotierras.vercel.app/checkout/pending?order=' . $order->site_transaction_id);
             } else {
@@ -180,12 +182,63 @@ class PaymentController extends Controller
         return redirect('https://ochotierras.vercel.app/checkout/failure?error=getnet_verification_failed');
     }
 
-    private function handleSuccess(Order $order, $paymentId)
+    /**
+     * Maneja las notificaciones asíncronas (Webhooks) de Getnet.
+     */
+    public function handleNotification(Request $request)
     {
-        if ($order->status === 'PAID') {
-            return redirect('https://ochotierras.vercel.app/checkout/success?order=' . $order->site_transaction_id);
+        Log::info('Getnet Notification Received', $request->all());
+
+        $requestId = $request->input('requestId');
+        $reference = $request->input('reference');
+
+        if (!$requestId || !$reference) {
+            return response()->json(['status' => 'error', 'message' => 'Missing data'], 400);
         }
 
+        $order = Order::where('site_transaction_id', $reference)->first();
+
+        if (!$order) {
+            Log::error("Order not found for reference: {$reference}");
+            return response()->json(['status' => 'error', 'message' => 'Order not found'], 404);
+        }
+
+        // Si ya está pagada, simplemente respondemos OK
+        if ($order->status === 'PAID') {
+            return response()->json(['status' => 'ok']);
+        }
+
+        // Verificamos el estado real contra Getnet por seguridad
+        $login = env('GETNET_LOGIN');
+        $secretKey = env('GETNET_TRANKEY');
+        $endpoint = env('GETNET_ENDPOINT');
+
+        $nonce = random_bytes(16);
+        $nonceBase64 = base64_encode($nonce);
+        $seed = date('c');
+        $tranKey = base64_encode(hash('sha256', $nonce . $seed . $secretKey, true));
+        $auth = ['login' => $login, 'tranKey' => $tranKey, 'nonce' => $nonceBase64, 'seed' => $seed];
+
+        $response = Http::post("{$endpoint}/api/session/{$requestId}", ['auth' => $auth]);
+
+        if ($response->successful()) {
+            $data = $response->json();
+            $status = $data['status']['status'] ?? null;
+
+            if ($status === 'APPROVED') {
+                $paymentId = $data['payment'][0]['authorization'] ?? $requestId;
+                $this->finalizePayment($order, $paymentId);
+                return response()->json(['status' => 'ok']);
+            }
+        }
+
+        return response()->json(['status' => 'ok']); // Siempre respondemos 200 a la pasarela
+    }
+
+    private function finalizePayment(Order $order, $paymentId)
+    {
+        if ($order->status === 'PAID') return;
+        
         try {
             DB::beginTransaction();
 
@@ -204,25 +257,20 @@ class PaymentController extends Controller
             $order->update(['status' => 'PAID', 'payment_id' => $paymentId]);
             DB::commit();
 
-            // 3. Enviar emails de notificación (Envío Seguro)
+            // Enviar emails
             try {
-                // Email al cliente
                 if ($order->customer_email) {
                     Mail::to($order->customer_email)->send(new OrderConfirmed($order));
                 }
-                // Email al equipo
                 Mail::to('info@ochotierras.cl')
                     ->cc('contacto@ochotierras.cl')
                     ->send(new OrderNotification($order));
             } catch (\Exception $mailEx) {
-                Log::error("Error enviando notificaciones de pago para orden {$order->id}: " . $mailEx->getMessage());
+                Log::error("Error avisando pago: " . $mailEx->getMessage());
             }
-
-            return redirect('https://ochotierras.vercel.app/checkout/success?order=' . $order->site_transaction_id);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect('https://ochotierras.vercel.app/checkout/failure?error=processing');
+            Log::error("Error finalizando pago: " . $e->getMessage());
         }
     }
 }

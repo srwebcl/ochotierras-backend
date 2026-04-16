@@ -226,6 +226,7 @@ Route::get('/categories', function () {
 Route::post('/payment/init', [App\Http\Controllers\PaymentController::class, 'init']);
 Route::get('/payment/confirm-mock', [App\Http\Controllers\PaymentController::class, 'confirmMock']);
 Route::get('/payment/return', [App\Http\Controllers\PaymentController::class, 'handleReturn']);
+Route::post('/payment/notify', [App\Http\Controllers\PaymentController::class, 'handleNotification']);
 
 Route::post('/shipping/calculate', function (Request $request) {
     $request->validate([
