@@ -169,21 +169,21 @@ class PaymentController extends Controller
     {
         $reference = $request->query('reference');
         if (!$reference) {
-            return redirect('http://localhost:3000/checkout/failure?error=missing_reference');
+            return redirect('https://ochotierras.vercel.app/checkout/failure?error=missing_reference');
         }
 
         $order = Order::where('site_transaction_id', $reference)->first();
         if (!$order) {
-            return redirect('http://localhost:3000/checkout/failure?error=order_not_found');
+            return redirect('https://ochotierras.vercel.app/checkout/failure?error=order_not_found');
         }
 
         if ($order->status === 'PAID') {
-            return redirect('http://localhost:3000/checkout/success?order=' . $order->site_transaction_id);
+            return redirect('https://ochotierras.vercel.app/checkout/success?order=' . $order->site_transaction_id);
         }
 
         $requestId = $order->payment_id; // Guardado en el init
         if (!$requestId) {
-            return redirect('http://localhost:3000/checkout/failure?error=missing_request_id');
+            return redirect('https://ochotierras.vercel.app/checkout/failure?error=missing_request_id');
         }
 
         // Consultar a Getnet el estado de la transacción
@@ -215,14 +215,14 @@ class PaymentController extends Controller
                 $paymentId = $data['payment'][0]['authorization'] ?? $requestId;
                 return $this->handleSuccess($order, $paymentId);
             } elseif ($status === 'PENDING') {
-                return redirect('http://localhost:3000/checkout/pending?order=' . $order->site_transaction_id);
+                return redirect('https://ochotierras.vercel.app/checkout/pending?order=' . $order->site_transaction_id);
             } else {
                 $order->update(['status' => 'FAILED']);
-                return redirect('http://localhost:3000/checkout/failure?error=payment_rejected');
+                return redirect('https://ochotierras.vercel.app/checkout/failure?error=payment_rejected');
             }
         }
 
-        return redirect('http://localhost:3000/checkout/failure?error=getnet_verification_failed');
+        return redirect('https://ochotierras.vercel.app/checkout/failure?error=getnet_verification_failed');
     }
 
     /**
@@ -231,7 +231,7 @@ class PaymentController extends Controller
     private function handleSuccess(Order $order, $paymentId)
     {
         if ($order->status === 'PAID') {
-            return redirect('http://localhost:3000/checkout/success?order=' . $order->site_transaction_id);
+            return redirect('https://ochotierras.vercel.app/checkout/success?order=' . $order->site_transaction_id);
         }
 
         try {
@@ -262,12 +262,12 @@ class PaymentController extends Controller
 
             DB::commit();
 
-            return redirect('http://localhost:3000/checkout/success?order=' . $order->site_transaction_id);
+            return redirect('https://ochotierras.vercel.app/checkout/success?order=' . $order->site_transaction_id);
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error en confirmación de pago: ' . $e->getMessage());
-            return redirect('http://localhost:3000/checkout/failure?error=processing');
+            return redirect('https://ochotierras.vercel.app/checkout/failure?error=processing');
         }
     }
 }
