@@ -64,16 +64,28 @@ class PaymentController extends Controller
             }
 
             // 2. Crear Orden
-            $order = Order::create([
-                'customer_name' => $validated['buyer']['name'],
-                'customer_email' => $validated['buyer']['email'],
-                'customer_phone' => $validated['buyer']['phone'],
-                'shipping_address' => $validated['buyer']['address'] . ', ' . ($validated['buyer']['city'] ?? ''),
-                'status' => 'PENDING',
-                'total_amount' => $validated['total'],
+            $shippingAddress = $validated['buyer']['address'] . ', ' . ($validated['buyer']['city'] ?? '');
+
+            // Construir array de datos compatible con ambas versiones del schema de BD
+            $orderData = [
+                'customer_name'    => $validated['buyer']['name'],
+                'customer_email'   => $validated['buyer']['email'],
+                'customer_phone'   => $validated['buyer']['phone'],
+                'status'           => 'PENDING',
+                'total_amount'     => $validated['total'],
                 'site_transaction_id' => 'ORD-' . strtoupper(uniqid()),
                 'marketing_opt_in' => false,
-            ]);
+            ];
+
+            // Insertar en la columna correcta según qué columna existe en la BD
+            if (\Schema::hasColumn('orders', 'shipping_address')) {
+                $orderData['shipping_address'] = $shippingAddress;
+            }
+            if (\Schema::hasColumn('orders', 'address_shipping')) {
+                $orderData['address_shipping'] = $shippingAddress;
+            }
+
+            $order = Order::create($orderData);
 
             // 3. Crear Items
             foreach ($validated['items'] as $item) {
