@@ -83,6 +83,10 @@
                 <td style="padding:8px 0;color:#666666;font-size:12px;border-bottom:1px solid #222222;">Correo</td>
                 <td style="padding:8px 0;color:#aaaaaa;font-size:12px;text-align:right;border-bottom:1px solid #222222;">{{ $order->customer_email }}</td>
               </tr>
+              <tr>
+                <td style="padding:8px 0;color:#666666;font-size:12px;border-bottom:1px solid #222222;">Envío</td>
+                <td style="padding:8px 0;color:#aaaaaa;font-size:12px;font-weight:700;text-align:right;border-bottom:1px solid #222222;">SIN COSTO ADICIONAL</td>
+              </tr>
               @if($order->shipping_address ?? $order->address_shipping)
               <tr>
                 <td style="padding:8px 0;color:#666666;font-size:12px;">Dirección de envío</td>
