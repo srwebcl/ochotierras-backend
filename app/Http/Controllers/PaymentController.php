@@ -143,10 +143,10 @@ class PaymentController extends Controller
     {
         $reference = $request->query('reference');
         $order = Order::where('site_transaction_id', $reference)->first();
-        if (!$order) return redirect('https://ochotierras.vercel.app/checkout/failure?error=order_not_found');
+        if (!$order) return redirect('https://ochotierras.cl/es/checkout/failure?error=order_not_found');
 
         if ($order->status === 'PAID') {
-            return redirect('https://ochotierras.vercel.app/checkout/success?order=' . $order->site_transaction_id);
+            return redirect('https://ochotierras.cl/es/checkout/success?order=' . $order->site_transaction_id);
         }
 
         $requestId = $order->payment_id;
@@ -170,16 +170,16 @@ class PaymentController extends Controller
             if ($status === 'APPROVED') {
                 $paymentId = $data['payment'][0]['authorization'] ?? $requestId;
                 $this->finalizePayment($order, $paymentId);
-                return redirect('https://ochotierras.vercel.app/checkout/success?order=' . $order->site_transaction_id);
+                return redirect('https://ochotierras.cl/es/checkout/success?order=' . $order->site_transaction_id);
             } elseif ($status === 'PENDING') {
-                return redirect('https://ochotierras.vercel.app/checkout/pending?order=' . $order->site_transaction_id);
+                return redirect('https://ochotierras.cl/es/checkout/pending?order=' . $order->site_transaction_id);
             } else {
                 $order->update(['status' => 'FAILED']);
-                return redirect('https://ochotierras.vercel.app/checkout/failure?error=payment_rejected');
+                return redirect('https://ochotierras.cl/es/checkout/failure?error=payment_rejected');
             }
         }
 
-        return redirect('https://ochotierras.vercel.app/checkout/failure?error=getnet_verification_failed');
+        return redirect('https://ochotierras.cl/es/checkout/failure?error=getnet_verification_failed');
     }
 
     /**
