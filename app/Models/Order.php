@@ -20,6 +20,9 @@ class Order extends Model
         'site_transaction_id',
         'payment_id',
         'marketing_opt_in',
+        'coupon_code',
+        'discount_amount',
+        'abandoned_email_sent'
     ];
 
     public function items()

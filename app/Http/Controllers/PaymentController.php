@@ -30,6 +30,9 @@ class PaymentController extends Controller
             'buyer.email' => 'required|email',
             'buyer.phone' => 'required|string',
             'buyer.address' => 'required|string',
+            'buyer.city' => 'required|string',
+            'buyer.region' => 'required|string',
+            'coupon_code' => 'nullable|string'
         ]);
 
         try {
@@ -54,13 +57,43 @@ class PaymentController extends Controller
                 }
             }
 
-            $shippingAddress = $validated['buyer']['address'] . ', ' . ($validated['buyer']['city'] ?? '');
+            // Calculate actual total from products
+            $calculatedTotal = 0;
+            foreach ($validated['items'] as $item) {
+                $product = Product::find($item['id']);
+                $calculatedTotal += $product->price * $item['quantity'];
+            }
+
+            // Apply coupon if exists
+            $discountAmount = 0;
+            $appliedCoupon = null;
+            if (!empty($validated['coupon_code'])) {
+                $coupon = \App\Models\Coupon::where('code', strtoupper($validated['coupon_code']))
+                    ->where('is_active', true)
+                    ->first();
+
+                if ($coupon && (!$coupon->expires_at || !$coupon->expires_at->isPast())) {
+                    $appliedCoupon = $coupon->code;
+                    if ($coupon->discount_type === 'percentage') {
+                        $discountAmount = $calculatedTotal * ($coupon->discount_value / 100);
+                    } else {
+                        $discountAmount = $coupon->discount_value;
+                    }
+                    $discountAmount = min($discountAmount, $calculatedTotal);
+                }
+            }
+
+            $finalTotal = $calculatedTotal - $discountAmount;
+
+            $shippingAddress = $validated['buyer']['address'] . ', ' . $validated['buyer']['city'] . ', ' . $validated['buyer']['region'];
             $orderData = [
                 'customer_name'    => $validated['buyer']['name'],
                 'customer_email'   => $validated['buyer']['email'],
                 'customer_phone'   => $validated['buyer']['phone'],
                 'status'           => 'PENDING',
-                'total_amount'     => $validated['total'],
+                'total_amount'     => $finalTotal,
+                'coupon_code'      => $appliedCoupon,
+                'discount_amount'  => $discountAmount,
                 'site_transaction_id' => 'ORD-' . strtoupper(uniqid()),
                 'marketing_opt_in' => false,
             ];
@@ -79,6 +112,26 @@ class PaymentController extends Controller
                     'unit_price' => $product->price,
                     'total_price' => $product->price * $item['quantity'],
                 ]);
+            }
+
+            // Enviar evento a Brevo
+            try {
+                if (env('BREVO_API_KEY')) {
+                    Http::withHeaders([
+                        'api-key' => env('BREVO_API_KEY'),
+                        'accept' => 'application/json',
+                    ])->post('https://api.brevo.com/v3/events', [
+                        'event_name' => 'cart_created',
+                        'contact_email' => $order->customer_email,
+                        'properties' => [
+                            'order_id' => $order->site_transaction_id,
+                            'total' => $order->total_amount,
+                            'items_count' => count($validated['items'])
+                        ]
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error sending cart_created to Brevo: ' . $e->getMessage());
             }
 
             DB::commit();
@@ -256,6 +309,25 @@ class PaymentController extends Controller
 
             $order->update(['status' => 'PAID', 'payment_id' => $paymentId]);
             DB::commit();
+
+            // Enviar evento a Brevo (order_completed)
+            try {
+                if (env('BREVO_API_KEY')) {
+                    Http::withHeaders([
+                        'api-key' => env('BREVO_API_KEY'),
+                        'accept' => 'application/json',
+                    ])->post('https://api.brevo.com/v3/events', [
+                        'event_name' => 'order_completed',
+                        'contact_email' => $order->customer_email,
+                        'properties' => [
+                            'order_id' => $order->site_transaction_id,
+                            'total' => $order->total_amount
+                        ]
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error sending order_completed to Brevo: ' . $e->getMessage());
+            }
 
             // Enviar emails
             try {

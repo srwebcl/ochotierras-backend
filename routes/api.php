@@ -228,6 +228,8 @@ Route::get('/payment/confirm-mock', [App\Http\Controllers\PaymentController::cla
 Route::get('/payment/return', [App\Http\Controllers\PaymentController::class, 'handleReturn']);
 Route::post('/payment/notify', [App\Http\Controllers\PaymentController::class, 'handleNotification']);
 
+Route::post('/coupons/validate', [App\Http\Controllers\CouponController::class, 'validateCoupon']);
+
 Route::post('/shipping/calculate', function (Request $request) {
     $request->validate([
         'region' => 'required|string',
