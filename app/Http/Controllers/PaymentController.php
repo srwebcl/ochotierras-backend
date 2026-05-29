@@ -118,10 +118,10 @@ class PaymentController extends Controller
             try {
                 if (env('BREVO_API_KEY')) {
                     Http::withHeaders([
-                        'api-key' => env('BREVO_API_KEY'),
+                        'ma-key' => env('BREVO_API_KEY'),
                         'accept' => 'application/json',
-                    ])->post('https://api.brevo.com/v3/events', [
-                        'event_name' => 'cart_created',
+                    ])->post('https://in-automate.brevo.com/api/v2/trackEvent', [
+                        'event' => 'cart_created',
                         'email' => $order->customer_email,
                         'properties' => [
                             'order_id' => $order->site_transaction_id,
@@ -314,10 +314,10 @@ class PaymentController extends Controller
             try {
                 if (env('BREVO_API_KEY')) {
                     Http::withHeaders([
-                        'api-key' => env('BREVO_API_KEY'),
+                        'ma-key' => env('BREVO_API_KEY'),
                         'accept' => 'application/json',
-                    ])->post('https://api.brevo.com/v3/events', [
-                        'event_name' => 'order_completed',
+                    ])->post('https://in-automate.brevo.com/api/v2/trackEvent', [
+                        'event' => 'order_completed',
                         'email' => $order->customer_email,
                         'properties' => [
                             'order_id' => $order->site_transaction_id,
