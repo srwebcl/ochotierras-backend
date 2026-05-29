@@ -122,7 +122,7 @@ class PaymentController extends Controller
                         'accept' => 'application/json',
                     ])->post('https://api.brevo.com/v3/events', [
                         'event_name' => 'cart_created',
-                        'contact_email' => $order->customer_email,
+                        'email' => $order->customer_email,
                         'properties' => [
                             'order_id' => $order->site_transaction_id,
                             'total' => $order->total_amount,
@@ -318,7 +318,7 @@ class PaymentController extends Controller
                         'accept' => 'application/json',
                     ])->post('https://api.brevo.com/v3/events', [
                         'event_name' => 'order_completed',
-                        'contact_email' => $order->customer_email,
+                        'email' => $order->customer_email,
                         'properties' => [
                             'order_id' => $order->site_transaction_id,
                             'total' => $order->total_amount
