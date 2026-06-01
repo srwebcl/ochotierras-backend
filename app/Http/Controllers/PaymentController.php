@@ -335,7 +335,7 @@ class PaymentController extends Controller
                     Mail::to($order->customer_email)->send(new OrderConfirmed($order));
                 }
                 Mail::to('info@ochotierras.cl')
-                    ->cc('contacto@ochotierras.cl')
+                    ->cc('rcuellar@ochotierras.cl')
                     ->send(new OrderNotification($order));
             } catch (\Exception $mailEx) {
                 Log::error("Error avisando pago: " . $mailEx->getMessage());
