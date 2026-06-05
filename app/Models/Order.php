@@ -22,7 +22,9 @@ class Order extends Model
         'marketing_opt_in',
         'coupon_code',
         'discount_amount',
-        'abandoned_email_sent'
+        'abandoned_email_sent',
+        'customer_rut',
+        'document_type'
     ];
 
     public function items()

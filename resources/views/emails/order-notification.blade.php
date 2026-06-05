@@ -55,6 +55,8 @@
           <td style="padding:20px 24px;">
             <p style="margin:0 0 4px;color:#ffffff;font-size:18px;font-weight:600;">{{ $order->customer_name }}</p>
             <p style="margin:0 0 8px;color:#888888;font-size:13px;">{{ $order->customer_email }}</p>
+            <p style="margin:0 0 8px;color:#aaaaaa;font-size:13px;">RUT: {{ $order->customer_rut }}</p>
+            <p style="margin:0 0 8px;color:#aaaaaa;font-size:13px;">Tipo de Documento: <strong style="text-transform:uppercase;">{{ $order->document_type }}</strong></p>
             @if($order->customer_phone)
             <p style="margin:0;color:#666666;font-size:12px;">📞 {{ $order->customer_phone }}</p>
             @endif

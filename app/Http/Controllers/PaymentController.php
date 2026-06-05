@@ -32,6 +32,8 @@ class PaymentController extends Controller
             'buyer.address' => 'required|string',
             'buyer.city' => 'required|string',
             'buyer.region' => 'required|string',
+            'buyer.rut' => 'required|string',
+            'buyer.document_type' => 'required|in:boleta,factura',
             'coupon_code' => 'nullable|string'
         ]);
 
@@ -96,6 +98,8 @@ class PaymentController extends Controller
                 'discount_amount'  => $discountAmount,
                 'site_transaction_id' => 'ORD-' . strtoupper(uniqid()),
                 'marketing_opt_in' => false,
+                'customer_rut'     => $validated['buyer']['rut'],
+                'document_type'    => $validated['buyer']['document_type'],
             ];
 
             if (\Schema::hasColumn('orders', 'shipping_address')) $orderData['shipping_address'] = $shippingAddress;

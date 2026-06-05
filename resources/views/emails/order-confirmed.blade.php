@@ -84,6 +84,14 @@
                 <td style="padding:8px 0;color:#aaaaaa;font-size:12px;text-align:right;border-bottom:1px solid #222222;">{{ $order->customer_email }}</td>
               </tr>
               <tr>
+                <td style="padding:8px 0;color:#666666;font-size:12px;border-bottom:1px solid #222222;">RUT</td>
+                <td style="padding:8px 0;color:#aaaaaa;font-size:12px;text-align:right;border-bottom:1px solid #222222;">{{ $order->customer_rut }}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0;color:#666666;font-size:12px;border-bottom:1px solid #222222;">Documento</td>
+                <td style="padding:8px 0;color:#aaaaaa;font-size:12px;text-align:right;border-bottom:1px solid #222222;text-transform:uppercase;">{{ $order->document_type }}</td>
+              </tr>
+              <tr>
                 <td style="padding:8px 0;color:#666666;font-size:12px;border-bottom:1px solid #222222;">Envío</td>
                 <td style="padding:8px 0;color:#aaaaaa;font-size:12px;font-weight:700;text-align:right;border-bottom:1px solid #222222;">SIN COSTO ADICIONAL</td>
               </tr>
