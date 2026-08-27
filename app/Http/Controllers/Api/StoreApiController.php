@@ -261,4 +261,25 @@ class StoreApiController extends Controller
             'price' => 0,
         ]);
     }
+
+    public function siteSettings()
+    {
+        $settings = \App\Models\SiteSetting::current();
+
+        return [
+            'schedule' => $settings->schedule,
+            'scheduleEn' => $settings->schedule_en,
+            'location' => $settings->location,
+            'locationEn' => $settings->location_en,
+            'phoneWhatsapp' => $settings->phone_whatsapp,
+            'whatsappOnly' => $settings->whatsapp_only,
+            'email' => $settings->email,
+            'salesContacts' => collect($settings->sales_contacts ?? [])->map(fn($c) => [
+                'title' => $c['title'] ?? null,
+                'titleEn' => $c['title_en'] ?? null,
+                'phone' => $c['phone'] ?? null,
+                'email' => $c['email'] ?? null,
+            ]),
+        ];
+    }
 }

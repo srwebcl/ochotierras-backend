@@ -10,6 +10,7 @@ Route::get('/products', [App\Http\Controllers\Api\StoreApiController::class, 'pr
 Route::get('/packs', [App\Http\Controllers\Api\StoreApiController::class, 'packs']);
 Route::get('/categories', [App\Http\Controllers\Api\StoreApiController::class, 'categories']);
 Route::post('/shipping/calculate', [App\Http\Controllers\Api\StoreApiController::class, 'calculateShipping']);
+Route::get('/site-settings', [App\Http\Controllers\Api\StoreApiController::class, 'siteSettings']);
 
 Route::post('/payment/init', [App\Http\Controllers\PaymentController::class, 'init']);
 Route::get('/payment/confirm-mock', [App\Http\Controllers\PaymentController::class, 'confirmMock']);
