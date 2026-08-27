@@ -28,6 +28,9 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <env name="GETNET_LOGIN" value="test-login"/>
+        <env name="GETNET_TRANKEY" value="test-trankey"/>
+        <env name="GETNET_ENDPOINT" value="https://sandbox.test.getnet.local"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>

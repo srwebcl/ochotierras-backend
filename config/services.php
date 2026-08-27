@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'getnet' => [
+        'login' => env('GETNET_LOGIN'),
+        'trankey' => env('GETNET_TRANKEY'),
+        'endpoint' => env('GETNET_ENDPOINT'),
+    ],
+
+    'brevo' => [
+        'key' => env('BREVO_API_KEY'),
+    ],
+
 ];

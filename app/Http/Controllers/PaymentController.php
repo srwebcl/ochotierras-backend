@@ -120,9 +120,9 @@ class PaymentController extends Controller
 
             // Enviar evento a Brevo
             try {
-                if (env('BREVO_API_KEY')) {
+                if (config('services.brevo.key')) {
                     Http::withHeaders([
-                        'api-key' => env('BREVO_API_KEY'),
+                        'api-key' => config('services.brevo.key'),
                         'accept' => 'application/json',
                     ])->post('https://api.brevo.com/v3/events', [
                         'event_name' => 'cart_created',
@@ -140,9 +140,9 @@ class PaymentController extends Controller
 
             DB::commit();
 
-            $login = env('GETNET_LOGIN');
-            $secretKey = env('GETNET_TRANKEY');
-            $endpoint = env('GETNET_ENDPOINT');
+            $login = config('services.getnet.login');
+            $secretKey = config('services.getnet.trankey');
+            $endpoint = config('services.getnet.endpoint');
 
             $nonce = random_bytes(16);
             $nonceBase64 = base64_encode($nonce);
@@ -207,9 +207,9 @@ class PaymentController extends Controller
         }
 
         $requestId = $order->payment_id;
-        $login = env('GETNET_LOGIN');
-        $secretKey = env('GETNET_TRANKEY');
-        $endpoint = env('GETNET_ENDPOINT');
+        $login = config('services.getnet.login');
+        $secretKey = config('services.getnet.trankey');
+        $endpoint = config('services.getnet.endpoint');
 
         $nonce = random_bytes(16);
         $nonceBase64 = base64_encode($nonce);
@@ -266,9 +266,9 @@ class PaymentController extends Controller
         }
 
         // Verificamos el estado real contra Getnet por seguridad
-        $login = env('GETNET_LOGIN');
-        $secretKey = env('GETNET_TRANKEY');
-        $endpoint = env('GETNET_ENDPOINT');
+        $login = config('services.getnet.login');
+        $secretKey = config('services.getnet.trankey');
+        $endpoint = config('services.getnet.endpoint');
 
         $nonce = random_bytes(16);
         $nonceBase64 = base64_encode($nonce);
@@ -316,9 +316,9 @@ class PaymentController extends Controller
 
             // Enviar evento a Brevo (order_completed)
             try {
-                if (env('BREVO_API_KEY')) {
+                if (config('services.brevo.key')) {
                     Http::withHeaders([
-                        'api-key' => env('BREVO_API_KEY'),
+                        'api-key' => config('services.brevo.key'),
                         'accept' => 'application/json',
                     ])->post('https://api.brevo.com/v3/events', [
                         'event_name' => 'order_completed',

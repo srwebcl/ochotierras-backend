@@ -15,14 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/*',
             'webhooks/*',
+            'stripe/*',
         ]);
 
-        // Enable CORS for Vercel
-        $middleware->validateCsrfTokens(except: ['stripe/*']);
-
-        // Handle CORS manually or via config/cors.php if preferred, 
-        // but often in API-first setup we might need to be expansive:
-        $middleware->trustProxies(at: '*');
+        // Trust proxies should be handled by actual proxy configuration or left default
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -95,6 +95,7 @@ class ProductResource extends Resource
                                 Forms\Components\FileUpload::make('image')
                                     ->label('Imagen Principal')
                                     ->image()
+                                    ->maxSize(5120)
                                     ->directory('products')
                                     ->columnSpanFull(),
 
@@ -102,6 +103,7 @@ class ProductResource extends Resource
                                     ->label('Galería de Imágenes')
                                     ->image()
                                     ->multiple()
+                                    ->maxSize(5120)
                                     ->reorderable()
                                     ->directory('products/gallery')
                                     ->columnSpanFull(),
@@ -109,6 +111,7 @@ class ProductResource extends Resource
                                 Forms\Components\FileUpload::make('technical_sheet')
                                     ->label('Ficha Técnica (PDF)')
                                     ->acceptedFileTypes(['application/pdf'])
+                                    ->maxSize(5120)
                                     ->directory('technical-sheets')
                                     ->downloadable()
                                     ->columnSpanFull(),
