@@ -78,4 +78,25 @@ class UserAccessControlTest extends TestCase
         $this->assertNull($formData['password'] ?? null);
         $this->assertArrayNotHasKey('password', array_filter($formData, fn($v) => $v === $realHash));
     }
+
+    /**
+     * El campo llega vacío (test de arriba), pero el navegador del admin
+     * puede autocompletarlo solo con una contraseña guardada suya — si eso
+     * se guardara sin darse cuenta, pisaría la contraseña real de esa
+     * persona. `autocomplete="new-password"` es lo que se lo impide al
+     * navegador; este test confirma que el atributo efectivamente llega
+     * al HTML real, no solo que está declarado en el código.
+     */
+    public function test_the_password_field_tells_the_browser_not_to_autofill_it(): void
+    {
+        $superAdmin = User::factory()->create(['is_super_admin' => true, 'email' => 'jefe@ochotierras.cl']);
+        $target = User::factory()->create(['email' => 'target@ochotierras.cl']);
+
+        $html = Livewire::actingAs($superAdmin)
+            ->test(ManageUsers::class)
+            ->mountTableAction('edit', $target)
+            ->html();
+
+        $this->assertStringContainsString('autocomplete="new-password"', $html);
+    }
 }

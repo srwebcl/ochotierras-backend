@@ -62,6 +62,13 @@ class UserResource extends Resource
                             ->label('Contraseña')
                             ->password()
                             ->revealable()
+                            // Evita que el navegador autocomplete este campo con
+                            // una contraseña guardada (propia o ajena) — sin esto,
+                            // el campo puede aparecer con puntos que NO vienen del
+                            // servidor, y si se guarda sin darse cuenta, se pisa
+                            // la contraseña real de esa persona con lo autocompletado.
+                            ->autocomplete('new-password')
+                            ->extraInputAttributes(['autocomplete' => 'new-password'])
                             ->visible(fn(string $operation): bool => in_array($operation, ['create', 'edit']))
                             ->required(fn(string $operation): bool => $operation === 'create')
                             ->dehydrated(fn(?string $state): bool => filled($state))
