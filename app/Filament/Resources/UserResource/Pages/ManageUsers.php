@@ -13,7 +13,8 @@ class ManageUsers extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->visible(fn(): bool => (bool) auth()->user()?->is_super_admin),
         ];
     }
 }

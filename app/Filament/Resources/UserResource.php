@@ -18,10 +18,12 @@ use Illuminate\Support\Facades\Hash;
  * @ochotierras.cl puede loguearse en /admin (ver User::canAccessPanel()).
  * Los clientes reales viven en CustomerResource (derivados de los pedidos).
  *
- * Solo los Super Admin pueden ver/crear/editar/eliminar cuentas ajenas acá
- * (ver los can*() al final). Cualquier otra cuenta puede cambiar su propia
- * contraseña desde su perfil (menú de usuario, arriba a la derecha) sin
- * necesitar este acceso — ver ->profile() en AdminPanelProvider.
+ * Cualquier usuario del panel puede VER esta lista (solo lectura) — para
+ * saber quién tiene acceso. Crear, editar (contraseña incluida) y eliminar
+ * cuentas es exclusivo de Super Admin (ver los can*() al final). Cualquier
+ * usuario puede cambiar su PROPIA contraseña desde su perfil (menú de
+ * usuario, arriba a la derecha) sin necesitar este acceso — ver ->profile()
+ * en AdminPanelProvider.
  */
 class UserResource extends Resource
 {
@@ -51,10 +53,16 @@ class UserResource extends Resource
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true),
+                        // Solo tiene sentido al crear o editar (acciones ya
+                        // restringidas a Super Admin) — al ver un registro no
+                        // se muestra, no hay nada que "ver": nunca se rellena
+                        // con la contraseña real, solo permite escribir una
+                        // nueva.
                         Forms\Components\TextInput::make('password')
                             ->label('Contraseña')
                             ->password()
                             ->revealable()
+                            ->visible(fn(string $operation): bool => in_array($operation, ['create', 'edit']))
                             ->required(fn(string $operation): bool => $operation === 'create')
                             ->dehydrated(fn(?string $state): bool => filled($state))
                             ->dehydrateStateUsing(fn(string $state): string => Hash::make($state))
@@ -62,7 +70,7 @@ class UserResource extends Resource
                         Forms\Components\Toggle::make('is_super_admin')
                             ->label('Super Admin')
                             ->helperText('Puede ver, editar y eliminar cualquier cuenta del panel (incluida esta sección). Dáselo solo a quien realmente lo necesite.')
-                            ->disabled(fn(?Model $record): bool => $record !== null && $record->is(auth()->user()))
+                            ->disabled(fn(string $operation, ?Model $record): bool => $operation === 'view' || ($record !== null && $record->is(auth()->user())))
                             ->hint(fn(?Model $record): ?string => ($record !== null && $record->is(auth()->user())) ? 'No podés quitarte este permiso a vos mismo.' : null),
                     ]),
             ]);
@@ -90,14 +98,17 @@ class UserResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn(): bool => (bool) auth()->user()?->is_super_admin),
                 Tables\Actions\DeleteAction::make()
+                    ->visible(fn(): bool => (bool) auth()->user()?->is_super_admin)
                     ->disabled(fn(User $record): bool => $record->is(auth()->user())),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                ])->visible(fn(): bool => (bool) auth()->user()?->is_super_admin),
             ]);
     }
 
@@ -110,7 +121,13 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return (bool) auth()->user()?->is_super_admin;
+        // Cualquier usuario logueado al panel puede VER la lista.
+        return true;
+    }
+
+    public static function canView(Model $record): bool
+    {
+        return true;
     }
 
     public static function canCreate(): bool
