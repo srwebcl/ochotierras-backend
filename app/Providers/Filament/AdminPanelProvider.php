@@ -31,7 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Ochotierras')
             ->brandLogo(asset('images/logo.webp'))
             ->brandLogoHeight('3rem')
-            ->favicon(asset('images/logo.webp'))
+            ->favicon(asset('images/favicon.png'))
             ->colors([
                 // Mismos colores de marca que el sitio público (globals.css:
                 // --brand-gold, --brand-red, --brand-dark), para que el panel
