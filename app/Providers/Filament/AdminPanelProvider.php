@@ -10,6 +10,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -30,15 +31,35 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Ochotierras')
             ->brandLogo(asset('images/logo.webp'))
             ->brandLogoHeight('3rem')
+            ->favicon(asset('images/logo.webp'))
             ->colors([
-                'primary' => '#cfb53b', // Gold-ish color for Ochotierras
+                // Mismos colores de marca que el sitio público (globals.css:
+                // --brand-gold, --brand-red, --brand-dark), para que el panel
+                // se sienta parte del mismo producto y no un Filament genérico.
+                'primary' => Color::hex('#bca874'),
+                'danger' => Color::hex('#58181F'),
+                'gray' => Color::Stone,
             ])
+            ->font('Inter')
+            ->darkMode(true)
             ->navigationGroups([
                 'Ventas',
                 'Catálogo',
                 'Sitio Web',
                 'Sistema',
             ])
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn(): string => '<style>
+                    .fi-simple-layout {
+                        background: radial-gradient(circle at top, #1a1611 0%, #0a0a0a 65%);
+                    }
+                    .fi-simple-layout .fi-simple-main {
+                        border: 1px solid rgba(188, 168, 116, 0.15);
+                        box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+                    }
+                </style>',
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

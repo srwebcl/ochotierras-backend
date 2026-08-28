@@ -91,13 +91,13 @@ class OrderResource extends Resource
                                 Forms\Components\Select::make('status')
                                     ->label('Estado')
                                     ->options([
-                                        'pending' => 'Pendiente',
-                                        'paid' => 'Pagado',
-                                        'preparing' => 'En Preparación',
-                                        'shipped' => 'Enviado',
-                                        'delivered' => 'Entregado',
-                                        'cancelled' => 'Cancelado',
-                                        'failed' => 'Fallido',
+                                        'PENDING' => 'Pendiente',
+                                        'PAID' => 'Pagado',
+                                        'PREPARING' => 'En Preparación',
+                                        'SHIPPED' => 'Enviado',
+                                        'DELIVERED' => 'Entregado',
+                                        'CANCELLED' => 'Cancelado',
+                                        'FAILED' => 'Fallido',
                                     ])
                                     ->required(),
                                 Forms\Components\TextInput::make('total_amount')
@@ -128,24 +128,24 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'pending' => 'gray',
-                        'paid' => 'success',
-                        'preparing' => 'warning',
-                        'shipped' => 'info',
-                        'delivered' => 'success',
-                        'failed' => 'danger',
-                        'cancelled' => 'danger',
+                    ->color(fn(string $state): string => match (strtoupper($state)) {
+                        'PENDING' => 'gray',
+                        'PAID' => 'success',
+                        'PREPARING' => 'warning',
+                        'SHIPPED' => 'info',
+                        'DELIVERED' => 'success',
+                        'FAILED' => 'danger',
+                        'CANCELLED' => 'danger',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'pending' => 'Pendiente',
-                        'paid' => 'Pagado',
-                        'preparing' => 'En Preparación',
-                        'shipped' => 'Enviado',
-                        'delivered' => 'Entregado',
-                        'failed' => 'Fallido',
-                        'cancelled' => 'Cancelado',
+                    ->formatStateUsing(fn(string $state): string => match (strtoupper($state)) {
+                        'PENDING' => 'Pendiente',
+                        'PAID' => 'Pagado',
+                        'PREPARING' => 'En Preparación',
+                        'SHIPPED' => 'Enviado',
+                        'DELIVERED' => 'Entregado',
+                        'FAILED' => 'Fallido',
+                        'CANCELLED' => 'Cancelado',
                         default => $state,
                     })
                     ->searchable(),
