@@ -57,4 +57,25 @@ class UserAccessControlTest extends TestCase
 
         $this->actingAs($regular)->get('/admin/profile')->assertOk();
     }
+
+    /**
+     * Garantía explícita: ni siquiera un Super Admin puede VER la contraseña
+     * (hasheada) de otro usuario al abrir "Editar" — el campo debe llegar
+     * vacío, nunca con el hash real. Solo puede escribir una nueva.
+     */
+    public function test_not_even_a_super_admin_can_see_another_users_password_hash_when_editing(): void
+    {
+        $superAdmin = User::factory()->create(['is_super_admin' => true, 'email' => 'jefe@ochotierras.cl']);
+        $target = User::factory()->create(['email' => 'target@ochotierras.cl', 'password' => 'algo-secreto-123']);
+        $realHash = $target->password;
+
+        $component = Livewire::actingAs($superAdmin)
+            ->test(ManageUsers::class)
+            ->mountTableAction('edit', $target);
+
+        $formData = $component->get('mountedTableActionsData.0');
+
+        $this->assertNull($formData['password'] ?? null);
+        $this->assertArrayNotHasKey('password', array_filter($formData, fn($v) => $v === $realHash));
+    }
 }
