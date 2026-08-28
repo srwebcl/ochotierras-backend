@@ -23,6 +23,7 @@ class Order extends Model
         'coupon_code',
         'discount_amount',
         'abandoned_email_sent',
+        'abandoned_email_resend_id',
         'customer_rut',
         'document_type'
     ];

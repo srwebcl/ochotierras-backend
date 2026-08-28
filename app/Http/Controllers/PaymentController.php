@@ -140,6 +140,10 @@ class PaymentController extends Controller
 
             DB::commit();
 
+            // Programa el recordatorio de carrito abandonado directamente en
+            // Resend (se cancela en finalizePayment si el pedido se paga antes).
+            \App\Services\AbandonedCartMailer::schedule($order);
+
             $login = config('services.getnet.login');
             $secretKey = config('services.getnet.trankey');
             $endpoint = config('services.getnet.endpoint');
@@ -313,6 +317,10 @@ class PaymentController extends Controller
 
             $order->update(['status' => 'PAID', 'payment_id' => $paymentId]);
             DB::commit();
+
+            // El pedido se pagó a tiempo: cancela el recordatorio de carrito
+            // abandonado que se había programado en Resend al iniciar el checkout.
+            \App\Services\AbandonedCartMailer::cancel($order);
 
             // Enviar evento a Brevo (order_completed)
             try {

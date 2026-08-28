@@ -19,6 +19,7 @@ class CheckoutTest extends TestCase
                 'processUrl' => 'https://sandbox.test.getnet.local/session/REQ-TEST-123',
             ], 200),
             'api.brevo.com/*' => Http::response(['ok' => true], 200),
+            'api.resend.com/*' => Http::response(['id' => 'resend-test-id'], 200),
         ]);
     }
 
@@ -58,9 +59,11 @@ class CheckoutTest extends TestCase
             'customer_email' => 'buyer@example.com',
             'status' => 'PENDING',
             'total_amount' => 20000,
+            'abandoned_email_resend_id' => 'resend-test-id',
         ]);
 
         Http::assertSent(fn ($request) => str_contains($request->url(), '/api/session'));
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'api.resend.com/emails') && $request['scheduled_at']);
     }
 
     public function test_rejects_checkout_when_stock_is_insufficient(): void

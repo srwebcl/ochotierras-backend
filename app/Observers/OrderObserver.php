@@ -20,8 +20,11 @@ class OrderObserver
             return;
         }
 
-        // No notificar en estado inicial PENDING (eso lo maneja OrderConfirmed)
-        $skipStatuses = ['PENDING'];
+        // No notificar en PENDING (estado inicial) ni en PAID: la confirmación
+        // de pago ya la envía OrderConfirmed explícitamente desde el
+        // PaymentController — si no se excluyera acá, el cliente recibiría
+        // dos correos casi idénticos por la misma compra.
+        $skipStatuses = ['PENDING', 'PAID'];
         if (in_array($order->status, $skipStatuses)) {
             return;
         }

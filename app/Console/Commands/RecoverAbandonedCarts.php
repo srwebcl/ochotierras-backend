@@ -18,7 +18,9 @@ class RecoverAbandonedCarts extends Command
      *
      * @var string
      */
-    protected $description = 'Send recovery emails for abandoned carts';
+    protected $description = 'Respaldo: envía el recordatorio de carrito abandonado solo para los pedidos '
+        . 'en los que no se pudo programar en Resend al momento del checkout (ver App\\Services\\AbandonedCartMailer). '
+        . 'Requiere que el cron del scheduler (`schedule:run`) esté configurado en el servidor.';
 
     /**
      * Execute the console command.
@@ -26,9 +28,10 @@ class RecoverAbandonedCarts extends Command
     public function handle()
     {
         $cutoffTime = now()->subHours(2);
-        
+
         $abandonedOrders = \App\Models\Order::where('status', 'PENDING')
             ->where('abandoned_email_sent', false)
+            ->whereNull('abandoned_email_resend_id') // ya se programó vía Resend, no duplicar
             ->where('created_at', '<=', $cutoffTime)
             ->whereNotNull('customer_email')
             ->get();
