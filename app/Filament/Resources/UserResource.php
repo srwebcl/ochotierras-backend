@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -16,6 +17,11 @@ use Illuminate\Support\Facades\Hash;
  * no una lista de clientes de la tienda — cualquier fila acá con un correo
  * @ochotierras.cl puede loguearse en /admin (ver User::canAccessPanel()).
  * Los clientes reales viven en CustomerResource (derivados de los pedidos).
+ *
+ * Solo los Super Admin pueden ver/crear/editar/eliminar cuentas ajenas acá
+ * (ver los can*() al final). Cualquier otra cuenta puede cambiar su propia
+ * contraseña desde su perfil (menú de usuario, arriba a la derecha) sin
+ * necesitar este acceso — ver ->profile() en AdminPanelProvider.
  */
 class UserResource extends Resource
 {
@@ -35,7 +41,7 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Section::make()
-                    ->description('Cualquier cuenta con correo @ochotierras.cl puede acceder al panel completo — usar solo para el equipo, nunca para clientes.')
+                    ->description('Cualquier cuenta con correo @ochotierras.cl puede acceder al panel — usar solo para el equipo, nunca para clientes.')
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->label('Nombre')
@@ -53,6 +59,11 @@ class UserResource extends Resource
                             ->dehydrated(fn(?string $state): bool => filled($state))
                             ->dehydrateStateUsing(fn(string $state): string => Hash::make($state))
                             ->helperText(fn(string $operation): string => $operation === 'edit' ? 'Dejar en blanco para no cambiarla.' : ''),
+                        Forms\Components\Toggle::make('is_super_admin')
+                            ->label('Super Admin')
+                            ->helperText('Puede ver, editar y eliminar cualquier cuenta del panel (incluida esta sección). Dáselo solo a quien realmente lo necesite.')
+                            ->disabled(fn(?Model $record): bool => $record !== null && $record->is(auth()->user()))
+                            ->hint(fn(?Model $record): ?string => ($record !== null && $record->is(auth()->user())) ? 'No podés quitarte este permiso a vos mismo.' : null),
                     ]),
             ]);
     }
@@ -67,6 +78,9 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->label('Email')
                     ->searchable(),
+                Tables\Columns\IconColumn::make('is_super_admin')
+                    ->label('Super Admin')
+                    ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Creado')
                     ->dateTime()
@@ -77,7 +91,8 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->disabled(fn(User $record): bool => $record->is(auth()->user())),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -91,5 +106,30 @@ class UserResource extends Resource
         return [
             'index' => Pages\ManageUsers::route('/'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return (bool) auth()->user()?->is_super_admin;
+    }
+
+    public static function canCreate(): bool
+    {
+        return (bool) auth()->user()?->is_super_admin;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return (bool) auth()->user()?->is_super_admin;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return (bool) auth()->user()?->is_super_admin;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return (bool) auth()->user()?->is_super_admin;
     }
 }

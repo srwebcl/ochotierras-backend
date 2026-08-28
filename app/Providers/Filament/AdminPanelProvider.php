@@ -28,6 +28,10 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // Cualquier usuario puede editar su propio nombre/contraseña desde
+            // el menú de arriba a la derecha, sin necesitar acceso a "Usuarios
+            // del Panel" (que ahora es solo para Super Admin).
+            ->profile()
             ->brandName('Ochotierras')
             ->brandLogo(asset('images/logo.webp'))
             ->brandLogoHeight('3rem')
