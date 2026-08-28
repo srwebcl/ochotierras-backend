@@ -17,5 +17,8 @@ class Coupon extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'expires_at' => 'datetime',
+        // Entero tanto para % (ej. 10) como para montos fijos en CLP (ej. 5000);
+        // evita que Filament muestre "10.00" o "5000.00"
+        'discount_value' => 'integer',
     ];
 }

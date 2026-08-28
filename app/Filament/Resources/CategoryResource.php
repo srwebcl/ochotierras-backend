@@ -15,11 +15,13 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CategoryResource extends Resource
 {
-    protected static ?string $navigationGroup = 'Tienda';
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
+
+    protected static ?string $navigationGroup = 'Catálogo';
     protected static ?string $navigationLabel = 'Categorías';
     protected static ?string $modelLabel = 'Categoría';
     protected static ?string $pluralModelLabel = 'Categorías';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

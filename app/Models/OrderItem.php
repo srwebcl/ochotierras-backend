@@ -14,6 +14,12 @@ class OrderItem extends Model
         'total_price',
     ];
 
+    protected $casts = [
+        // CLP no usa decimales; evita que Filament muestre "60000.00"
+        'unit_price' => 'integer',
+        'total_price' => 'integer',
+    ];
+
     public function order()
     {
         return $this->belongsTo(Order::class);

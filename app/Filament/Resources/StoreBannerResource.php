@@ -21,7 +21,14 @@ class StoreBannerResource extends Resource
 {
     protected static ?string $model = StoreBanner::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-megaphone';
+
+    protected static ?string $navigationLabel = 'Banners de Tienda';
+    protected static ?string $modelLabel = 'Banner';
+    protected static ?string $pluralModelLabel = 'Banners de Tienda';
+
+    protected static ?string $navigationGroup = 'Sitio Web';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

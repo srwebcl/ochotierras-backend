@@ -28,6 +28,14 @@ class Order extends Model
         'document_type'
     ];
 
+    protected $casts = [
+        // CLP no usa decimales; evita que Filament muestre "60000.00"
+        'total_amount' => 'integer',
+        'discount_amount' => 'integer',
+        'marketing_opt_in' => 'boolean',
+        'abandoned_email_sent' => 'boolean',
+    ];
+
     public function items()
     {
         return $this->hasMany(OrderItem::class);

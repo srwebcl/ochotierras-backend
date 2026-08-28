@@ -80,7 +80,7 @@ class Product extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'is_pack' => 'boolean',
-        'price' => 'decimal:2',
+        'price' => 'integer', // CLP no usa decimales; evita que Filament muestre "60000.00"
         'awards' => 'array',
         'technical_details' => 'array',
         'units_per_box' => 'integer',

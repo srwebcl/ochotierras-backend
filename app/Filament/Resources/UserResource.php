@@ -3,50 +3,57 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Hash;
 
+/**
+ * OJO: este modelo es la tabla de autenticación del panel (App\Models\User),
+ * no una lista de clientes de la tienda — cualquier fila acá con un correo
+ * @ochotierras.cl puede loguearse en /admin (ver User::canAccessPanel()).
+ * Los clientes reales viven en CustomerResource (derivados de los pedidos).
+ */
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationIcon = 'heroicon-o-shield-check';
 
-    protected static ?string $navigationLabel = 'Clientes';
-    protected static ?string $modelLabel = 'Cliente';
-    protected static ?string $pluralModelLabel = 'Clientes';
+    protected static ?string $navigationLabel = 'Usuarios del Panel';
+    protected static ?string $modelLabel = 'Usuario del Panel';
+    protected static ?string $pluralModelLabel = 'Usuarios del Panel';
 
-    protected static ?string $navigationGroup = 'Tienda';
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()->withCount('orders');
-    }
+    protected static ?string $navigationGroup = 'Sistema';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Nombre')
-                    ->required(),
-                Forms\Components\TextInput::make('email')
-                    ->label('Email')
-                    ->email()
-                    ->required(),
-                Forms\Components\Placeholder::make('created_at')
-                    ->label('Registrado el')
-                    ->content(fn(User $record): string => $record->created_at->format('d/m/Y H:i')),
-                Forms\Components\Placeholder::make('orders_count')
-                    ->label('Pedidos Totales')
-                    ->content(fn(User $record): string => $record->orders()->count()),
+                Forms\Components\Section::make()
+                    ->description('Cualquier cuenta con correo @ochotierras.cl puede acceder al panel completo — usar solo para el equipo, nunca para clientes.')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nombre')
+                            ->required(),
+                        Forms\Components\TextInput::make('email')
+                            ->label('Email')
+                            ->email()
+                            ->required()
+                            ->unique(ignoreRecord: true),
+                        Forms\Components\TextInput::make('password')
+                            ->label('Contraseña')
+                            ->password()
+                            ->revealable()
+                            ->required(fn(string $operation): bool => $operation === 'create')
+                            ->dehydrated(fn(?string $state): bool => filled($state))
+                            ->dehydrateStateUsing(fn(string $state): string => Hash::make($state))
+                            ->helperText(fn(string $operation): string => $operation === 'edit' ? 'Dejar en blanco para no cambiarla.' : ''),
+                    ]),
             ]);
     }
 
@@ -60,11 +67,8 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->label('Email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('orders_count')
-                    ->label('Pedidos')
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Registrado')
+                    ->label('Creado')
                     ->dateTime()
                     ->sortable(),
             ])
@@ -78,18 +82,6 @@ class UserResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\BulkAction::make('export')
-                        ->label('Exportar Emails (CSV)')
-                        ->icon('heroicon-o-arrow-down-tray')
-                        ->action(function (\Illuminate\Support\Collection $records) {
-                            return response()->streamDownload(function () use ($records) {
-                                echo "Nombre,Email,Fecha Registro\n";
-                                foreach ($records as $record) {
-                                    echo "{$record->name},{$record->email},{$record->created_at}\n";
-                                }
-                            }, 'clientes_export.csv');
-                        })
-                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }

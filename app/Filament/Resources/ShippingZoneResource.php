@@ -19,11 +19,11 @@ class ShippingZoneResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
 
-    protected static ?string $navigationGroup = 'Tienda';
+    protected static ?string $navigationGroup = 'Catálogo';
     protected static ?string $navigationLabel = 'Despachos';
     protected static ?string $modelLabel = 'Zona de Despacho';
     protected static ?string $pluralModelLabel = 'Zonas de Despacho';
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
