@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\HeroSection;
 use App\Jobs\TranslateHero;
+use App\Services\FrontendRevalidator;
 use Illuminate\Support\Facades\Log;
 
 class HeroSectionObserver
@@ -24,5 +25,12 @@ class HeroSectionObserver
                 Log::error("Failed to dispatch Hero translation job: " . $e->getMessage());
             }
         }
+
+        FrontendRevalidator::tag('heroes');
+    }
+
+    public function deleted(HeroSection $hero): void
+    {
+        FrontendRevalidator::tag('heroes');
     }
 }

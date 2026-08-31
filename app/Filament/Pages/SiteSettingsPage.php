@@ -104,6 +104,8 @@ class SiteSettingsPage extends Page implements HasForms
     {
         SiteSetting::current()->update($this->form->getState());
 
+        \App\Services\FrontendRevalidator::tag('site-settings');
+
         Notification::make()
             ->title('Datos de contacto guardados')
             ->success()

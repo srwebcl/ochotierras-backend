@@ -45,4 +45,9 @@ return [
         'key' => env('BREVO_API_KEY'),
     ],
 
+    'frontend' => [
+        'url' => env('FRONTEND_URL', 'https://www.ochotierras.cl'),
+        'revalidate_secret' => env('REVALIDATE_SECRET'),
+    ],
+
 ];

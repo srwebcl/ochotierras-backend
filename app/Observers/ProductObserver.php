@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Product;
 use App\Jobs\TranslateProduct;
+use App\Services\FrontendRevalidator;
 use Illuminate\Support\Facades\Log;
 
 class ProductObserver
@@ -22,7 +23,7 @@ class ProductObserver
             empty($product->pairing_en);
 
         if ($needsTranslation) {
-            // We dispatch the job to the queue. 
+            // We dispatch the job to the queue.
             // If QUEUE_CONNECTION=sync (default in dev), it runs immediately.
             try {
                 TranslateProduct::dispatch($product);
@@ -30,5 +31,12 @@ class ProductObserver
                 Log::error("Failed to dispatch translation job: " . $e->getMessage());
             }
         }
+
+        FrontendRevalidator::tag('products');
+    }
+
+    public function deleted(Product $product): void
+    {
+        FrontendRevalidator::tag('products');
     }
 }
