@@ -22,6 +22,7 @@ class Product extends Model
         'sku',
         'image',
         'accent_color',
+        'badge_text',
         'meta_title',
         'meta_description',
         'is_active',

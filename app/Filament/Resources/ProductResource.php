@@ -88,6 +88,12 @@ class ProductResource extends Resource
                                 Forms\Components\Toggle::make('is_active')
                                     ->label('Producto Activo / Visible')
                                     ->default(true),
+
+                                Forms\Components\TextInput::make('badge_text')
+                                    ->label('Etiqueta de la Tarjeta (Badge)')
+                                    ->maxLength(30)
+                                    ->placeholder('Ej: PACK MIX, EDICIÓN LIMITADA, NUEVO')
+                                    ->helperText('Texto que aparece arriba a la derecha de la tarjeta en /tienda. Si se deja vacío, se muestra automáticamente la categoría (para vinos) o "PACK MIX" (para packs), como hasta ahora.'),
                             ]),
 
                         Forms\Components\Tabs\Tab::make('Multimedia')
