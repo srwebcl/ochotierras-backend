@@ -23,13 +23,17 @@ echo "== 1/6: composer =="
 # sola vez a mano desde "Setup PHP App" en cPanel, nunca desde acá. Para no
 # depender de eso, el script se trae su propia copia de Composer la primera
 # vez y la reutiliza en cada deploy siguiente (no se vuelve a descargar).
+# El PHP de línea de comandos de este hosting trae allow_url_fopen
+# apagado, y el instalador de Composer lo exige. No tocamos el php.ini
+# general del servidor (afectaría otras cosas); se lo activamos solo
+# para este comando puntual con -d, como sugiere el propio Composer.
 if [ ! -f composer.phar ]; then
     echo "   (primera vez: descargando composer.phar — los próximos deploys ya no necesitan esto)"
     curl -sS -f -o composer-setup.php https://getcomposer.org/installer
-    $PHP composer-setup.php --quiet
+    $PHP -d allow_url_fopen=On composer-setup.php --quiet
     rm -f composer-setup.php
 fi
-$PHP composer.phar install --no-dev --optimize-autoloader
+$PHP -d allow_url_fopen=On composer.phar install --no-dev --optimize-autoloader
 
 echo "== 2/6: migraciones =="
 $PHP artisan migrate --force
