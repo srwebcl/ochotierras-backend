@@ -16,17 +16,29 @@ set -e  # si algo falla, para acá y avisa, no sigue como si nada.
 
 PHP=/opt/cpanel/ea-php82/root/usr/bin/php
 
-echo "== 1/5: composer install =="
-$PHP /usr/local/bin/composer install --no-dev --optimize-autoloader
+echo "== 1/6: composer =="
+# Este hosting NO tiene el comando "composer" instalado en el sistema
+# (se confirmó por SSH: ni /usr/local/bin/composer ni /opt/cpanel/composer/
+# tienen nada útil). El vendor/ que hoy corre en producción se instaló una
+# sola vez a mano desde "Setup PHP App" en cPanel, nunca desde acá. Para no
+# depender de eso, el script se trae su propia copia de Composer la primera
+# vez y la reutiliza en cada deploy siguiente (no se vuelve a descargar).
+if [ ! -f composer.phar ]; then
+    echo "   (primera vez: descargando composer.phar — los próximos deploys ya no necesitan esto)"
+    $PHP -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    $PHP composer-setup.php --quiet
+    rm -f composer-setup.php
+fi
+$PHP composer.phar install --no-dev --optimize-autoloader
 
-echo "== 2/5: migraciones =="
+echo "== 2/6: migraciones =="
 $PHP artisan migrate --force
 
-echo "== 3/5: config cache =="
+echo "== 3/6: config cache =="
 $PHP artisan config:clear
 $PHP artisan config:cache
 
-echo "== 4/5: route cache =="
+echo "== 4/6: route cache =="
 $PHP artisan route:clear
 $PHP artisan route:cache
 
