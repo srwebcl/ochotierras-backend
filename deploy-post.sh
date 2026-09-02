@@ -25,7 +25,7 @@ echo "== 1/6: composer =="
 # vez y la reutiliza en cada deploy siguiente (no se vuelve a descargar).
 if [ ! -f composer.phar ]; then
     echo "   (primera vez: descargando composer.phar — los próximos deploys ya no necesitan esto)"
-    $PHP -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    curl -sS -f -o composer-setup.php https://getcomposer.org/installer
     $PHP composer-setup.php --quiet
     rm -f composer-setup.php
 fi
