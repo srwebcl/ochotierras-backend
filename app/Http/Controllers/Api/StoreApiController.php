@@ -12,6 +12,24 @@ use Illuminate\Support\Facades\Storage;
 
 class StoreApiController extends Controller
 {
+    /**
+     * Igual que Storage::url(), pero codifica cada segmento de la ruta.
+     * Los archivos subidos desde el panel pueden tener espacios u otros
+     * caracteres en el nombre (ej. "Reserva Especial CS.webp"); sin
+     * codificar, esa URL rompe al optimizador de imágenes de Next.js
+     * (causaba un Error 500 en las fichas de producto).
+     */
+    private function assetUrl(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        $encoded = implode('/', array_map('rawurlencode', explode('/', $path)));
+
+        return Storage::url($encoded);
+    }
+
     public function categoriesWines()
     {
         return Category::where('is_active', true)
@@ -35,10 +53,10 @@ class StoreApiController extends Controller
                             'nameEn' => $product->name_en,
                             'subtitle' => $product->subtitle,
                             'slug' => $product->slug,
-                            'image' => $product->image ? Storage::url($product->image) : null,
+                            'image' => $product->image ? $this->assetUrl($product->image) : null,
                             'price' => (int) $product->price,
                             'stock' => (int) $product->stock,
-                            'technical_sheet' => $product->technical_sheet ? Storage::url($product->technical_sheet) : null,
+                            'technical_sheet' => $product->technical_sheet ? $this->assetUrl($product->technical_sheet) : null,
                             'harvest_year' => $product->harvest_year,
                             'harvest_type' => $product->harvest_type,
                             'origin' => $product->origin,
@@ -80,7 +98,7 @@ class StoreApiController extends Controller
 
         return $heroes->map(function ($hero) {
             $images = $hero->images ?? [];
-            $imageUrls = array_map(fn($img) => Storage::url($img), $images);
+            $imageUrls = array_map(fn($img) => $this->assetUrl($img), $images);
 
             return [
                 'title' => $hero->title,
@@ -115,7 +133,7 @@ class StoreApiController extends Controller
                     'type' => $product->type,
                     'price' => (int) $product->price,
                     'stock' => (int) $product->stock,
-                    'image' => $product->image ? Storage::url($product->image) : null,
+                    'image' => $product->image ? $this->assetUrl($product->image) : null,
                     'bgGradient' => $product->type === 'Tinto'
                         ? "radial-gradient(circle at center, #5e0916 0%, transparent 70%)"
                         : ($product->type === 'Blanco'
@@ -149,7 +167,7 @@ class StoreApiController extends Controller
                     'badgeText' => $product->badge_text,
                     'price' => (int) $product->price,
                     'stock' => (int) $product->stock,
-                    'image' => $product->image ? Storage::url($product->image) : null,
+                    'image' => $product->image ? $this->assetUrl($product->image) : null,
                     'bgGradient' => $product->type === 'Tinto'
                         ? "radial-gradient(circle at center, #5e0916 0%, transparent 70%)"
                         : ($product->type === 'Blanco'
@@ -160,9 +178,9 @@ class StoreApiController extends Controller
                     'description' => $product->description,
                     'descriptionEn' => $product->description_en,
                     'slug' => $product->slug,
-                    'gallery' => $product->gallery ? array_map(fn($img) => Storage::url($img), $product->gallery) : [],
+                    'gallery' => $product->gallery ? array_map(fn($img) => $this->assetUrl($img), $product->gallery) : [],
                     'technical_details' => $product->technical_details,
-                    'technical_sheet' => $product->technical_sheet ? Storage::url($product->technical_sheet) : null,
+                    'technical_sheet' => $product->technical_sheet ? $this->assetUrl($product->technical_sheet) : null,
                     'vintage_year' => $product->vintage_year,
                     'strain' => $product->strain,
                     'origin' => $product->origin,
@@ -200,7 +218,7 @@ class StoreApiController extends Controller
                     'subtitleEn' => $product->subtitle_en,
                     'price' => (int) $product->price,
                     'stock' => (int) max(0, $minComponentStock),
-                    'image' => $product->image ? Storage::url($product->image) : null,
+                    'image' => $product->image ? $this->assetUrl($product->image) : null,
                     'badgeText' => $product->badge_text,
                     'description' => $product->description,
                     'descriptionEn' => $product->description_en,
@@ -209,7 +227,7 @@ class StoreApiController extends Controller
                         'id' => $item->id,
                         'name' => $item->name,
                         'quantity' => $item->pivot->quantity,
-                        'image' => $item->image ? Storage::url($item->image) : null,
+                        'image' => $item->image ? $this->assetUrl($item->image) : null,
                         'technical_details' => $item->technical_details,
                         'tasting_notes' => $item->tasting_notes,
                         'tasting_notes_en' => $item->tasting_notes_en,
