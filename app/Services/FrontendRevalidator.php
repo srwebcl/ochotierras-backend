@@ -36,12 +36,15 @@ class FrontendRevalidator
             // (por ejemplo, secreto que no coincide entre los dos .env),
             // Http::post() no lanza una excepción por sí solo con un 4xx/5xx
             // — quedaba en silencio total, pareciendo que todo había salido
-            // bien cuando en realidad nunca se revalidó nada.
+            // bien cuando en realidad nunca se revalidó nada. Se usa error()
+            // y no warning() a propósito: producción tiene LOG_LEVEL=error,
+            // así que un warning() nunca queda guardado en el log — se
+            // descubrió así, en vivo, cuando esto mismo pasó y no dejó rastro.
             if ($response->failed()) {
-                Log::warning("El frontend rechazó el aviso de revalidar el tag '{$tag}': HTTP {$response->status()} - {$response->body()}");
+                Log::error("El frontend rechazó el aviso de revalidar el tag '{$tag}': HTTP {$response->status()} - {$response->body()}");
             }
         } catch (\Throwable $e) {
-            Log::warning("No se pudo avisar al frontend que revalide el tag '{$tag}': " . $e->getMessage());
+            Log::error("No se pudo avisar al frontend que revalide el tag '{$tag}': " . $e->getMessage());
         }
     }
 }
