@@ -122,6 +122,7 @@ class StoreApiController extends Controller
     {
         return Product::where('is_active', true)
             ->where('is_featured', true)
+            ->orderBy('sort_order')
             ->get()
             ->map(function ($product) {
                 return [
@@ -153,6 +154,7 @@ class StoreApiController extends Controller
         return Product::where('is_active', true)
             ->where('is_pack', false)
             ->with('category')
+            ->orderBy('sort_order')
             ->get()
             ->map(function ($product) {
                 return [
@@ -196,6 +198,7 @@ class StoreApiController extends Controller
         return Product::where('is_active', true)
             ->where('is_pack', true)
             ->with('bundleItems')
+            ->orderBy('sort_order')
             ->get()
             ->map(function ($product) {
                 $minComponentStock = null;

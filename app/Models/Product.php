@@ -57,6 +57,7 @@ class Product extends Model
         'service_temp_en',
         'technical_details',
         'gallery',
+        'sort_order',
     ];
 
     public function category()
@@ -86,5 +87,6 @@ class Product extends Model
         'technical_details' => 'array',
         'units_per_box' => 'integer',
         'gallery' => 'array',
+        'sort_order' => 'integer',
     ];
 }
