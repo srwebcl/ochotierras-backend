@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Filament\Forms\Set;
+use Filament\Forms\Get;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ProductResource extends Resource
@@ -92,8 +93,32 @@ class ProductResource extends Resource
                                 Forms\Components\TextInput::make('badge_text')
                                     ->label('Etiqueta de la Tarjeta (Badge)')
                                     ->maxLength(30)
+                                    ->live()
                                     ->placeholder('Ej: PACK MIX, EDICIÓN LIMITADA, NUEVO')
                                     ->helperText('Texto que aparece arriba a la derecha de la tarjeta en /tienda. Si se deja vacío, se muestra automáticamente la categoría (para vinos) o "PACK MIX" (para packs), como hasta ahora.'),
+
+                                Forms\Components\Group::make()
+                                    ->visible(fn (Get $get): bool => filled($get('badge_text')))
+                                    ->schema([
+                                        Forms\Components\ColorPicker::make('badge_bg_color')
+                                            ->label('Color de Fondo del Badge')
+                                            ->helperText('Si se deja vacío, usa el color oscuro por defecto.'),
+
+                                        Forms\Components\ColorPicker::make('badge_text_color')
+                                            ->label('Color del Texto del Badge')
+                                            ->helperText('Si se deja vacío, usa blanco por defecto.'),
+
+                                        Forms\Components\Select::make('badge_size')
+                                            ->label('Tamaño del Badge')
+                                            ->options([
+                                                'small' => 'Pequeño',
+                                                'medium' => 'Mediano (por defecto)',
+                                                'large' => 'Grande',
+                                            ])
+                                            ->default('medium')
+                                            ->native(false),
+                                    ])
+                                    ->columns(3),
                             ]),
 
                         Forms\Components\Tabs\Tab::make('Multimedia')
