@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\SiteSettingsPage;
+use App\Filament\Resources\ProductResource\Pages\ListProducts;
 use App\Models\Product;
 use App\Models\SiteSetting;
 use App\Models\User;
@@ -50,6 +51,37 @@ class FrontendRevalidationTest extends TestCase
         Http::fake(['frontend.test/api/revalidate' => Http::response(['revalidated' => true], 200)]);
 
         Product::factory()->create();
+
+        Http::assertSent(function ($request) {
+            return $request->url() === 'https://frontend.test/api/revalidate'
+                && $request['tag'] === 'products';
+        });
+    }
+
+    public function test_reordering_products_in_the_panel_notifies_the_frontend_to_revalidate(): void
+    {
+        // El arrastrar-y-soltar de Filament actualiza sort_order con una
+        // consulta directa (bypassa ->save() y por lo tanto el
+        // ProductObserver) — este test cubre específicamente el aviso
+        // manual agregado en ListProducts::reorderTable().
+        $admin = User::factory()->create(['is_super_admin' => true]);
+        $one = Product::factory()->create(['sort_order' => 0]);
+        $two = Product::factory()->create(['sort_order' => 1]);
+
+        // El fake se arma después de crear los productos: si no, los dos
+        // Product::factory()->create() de arriba (que sí disparan el
+        // observer normal al guardar) también quedarían "enviados" y
+        // el assertSent de abajo sería un falso positivo.
+        Http::fake(['frontend.test/api/revalidate' => Http::response(['revalidated' => true], 200)]);
+
+        Livewire::actingAs($admin)
+            ->test(ListProducts::class)
+            ->call('reorderTable', [$two->id, $one->id]);
+
+        // El orden pasado es [$two, $one] -> $two queda primero (sort_order 1),
+        // $one queda segundo (sort_order 2).
+        $this->assertEquals(2, $one->fresh()->sort_order);
+        $this->assertEquals(1, $two->fresh()->sort_order);
 
         Http::assertSent(function ($request) {
             return $request->url() === 'https://frontend.test/api/revalidate'
